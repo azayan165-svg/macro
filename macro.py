@@ -39,7 +39,6 @@ class MouseInput(ctypes.Structure):
 class Input(ctypes.Structure):
     _fields_ = [("type", ctypes.c_ulong), ("mi", MouseInput)]
 
-# Pre-create all mouse inputs for maximum speed
 MOUSE_DOWN_FLAGS = {
     mouse.Button.left: 0x0002,
     mouse.Button.right: 0x0008,
@@ -149,7 +148,6 @@ class AutoClickerGUI:
         self.cps_entry.pack(side=tk.LEFT)
         self.cps_entry.bind("<Return>", self.update_cps)
 
-        # Create APPLY button with thin white border
         self.apply_button = tk.Button(
             cps_frame,
             text="Apply",
@@ -317,20 +315,16 @@ class AutoClickerGUI:
                 if current_time_ns >= next_click_time_ns:
                     send_click_fast()
                     
-                    # Schedule next click
                     next_click_time_ns += target_interval_ns
                     
-                    # Catch up if behind schedule
                     if current_time_ns - next_click_time_ns > target_interval_ns:
                         next_click_time_ns = current_time_ns + target_interval_ns
                 
-                # Dynamic sleep strategy
                 sleep_time_ns = next_click_time_ns - time_ns()
                 
-                if sleep_time_ns > 1_000_000:  # More than 1ms
-                    time.sleep(sleep_time_ns / 1_000_000_000)  # Normal sleep
-                elif sleep_time_ns > 10_000:  # More than 10μs
-                    # Minimal CPU usage for microsecond precision
+                if sleep_time_ns > 1_000_000:
+                    time.sleep(sleep_time_ns / 1_000_000_000)
+                elif sleep_time_ns > 10_000:
                     pass
                     
         except Exception as e:
@@ -358,7 +352,7 @@ class AutoClickerGUI:
                     fg="white"
                 )
 
-        self.root.after(1, self.update_loop)  # Faster 1ms update loop
+        self.root.after(1, self.update_loop)
 
 if __name__ == "__main__":
     root = tk.Tk()
