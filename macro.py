@@ -179,7 +179,7 @@ class AutoClickerGUI:
 
         tk.Label(
             footer,
-            text="Discord: 17ryzfr",
+            text="Discord: 7jadn",
             fg="gray",
             bg="#0b0b0b",
             font=("Segoe UI", 8)
