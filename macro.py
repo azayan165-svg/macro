@@ -148,13 +148,6 @@ class AutoClickerGUI:
         )
         self.status_label.pack(pady=5)
 
-        self.counter_label = tk.Label(
-            frame, text="Clicks: 0",
-            fg="orange", bg="#0b0b0b",
-            font=("Consolas", 10)
-        )
-        self.counter_label.pack(pady=4)
-
         # ================= LISTENERS =================
         self.key_listener = KeyboardListener(
             on_press=self.on_key_press,
