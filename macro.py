@@ -52,7 +52,7 @@ def send_click():
 class AutoClickerGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Ryzen's Python Macro")
+        self.root.title("Jadn's Python Macro")
         self.root.configure(bg="#0b0b0b")
         self.root.resizable(False, False)
 
@@ -74,7 +74,7 @@ class AutoClickerGUI:
 
         tk.Label(
             frame,
-            text="Ryzen's Python Macro",
+            text="Jadn's Python Macro",
             fg="white",
             bg="#0b0b0b",
             font=("Segoe UI", 16, "bold")
