@@ -127,7 +127,7 @@ class AutoClickerGUI:
                                 fg='gray', bg='black')
         made_by_label.pack(side=tk.LEFT)
         
-        discord_label = tk.Label(footer_frame, text="Discord: alisten_krazer", font=('Arial', 8),
+        discord_label = tk.Label(footer_frame, text="Discord: 17ryzfr", font=('Arial', 8),
                                 fg='gray', bg='black')
         discord_label.pack(side=tk.RIGHT)
         
