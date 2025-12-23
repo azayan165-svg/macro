@@ -39,37 +39,15 @@ class MouseInput(ctypes.Structure):
 class Input(ctypes.Structure):
     _fields_ = [("type", ctypes.c_ulong), ("mi", MouseInput)]
 
-MOUSE_DOWN_FLAGS = {
-    mouse.Button.left: 0x0002,
-    mouse.Button.right: 0x0008,
-    mouse.Button.middle: 0x0020,
-    mouse.Button.x1: 0x0080,
-    mouse.Button.x2: 0x0100,
-}
-MOUSE_UP_FLAGS = {
-    mouse.Button.left: 0x0004,
-    mouse.Button.right: 0x0010,
-    mouse.Button.middle: 0x0040,
-    mouse.Button.x1: 0x0080,
-    mouse.Button.x2: 0x0100,
-}
-
-MOUSE_INPUTS = {
-    'left_down': Input(type=0, mi=MouseInput(0, 0, 0, MOUSE_DOWN_FLAGS[mouse.Button.left], 0, None)),
-    'left_up': Input(type=0, mi=MouseInput(0, 0, 0, MOUSE_UP_FLAGS[mouse.Button.left], 0, None)),
-}
-
-LEFT_DOWN = MOUSE_INPUTS['left_down']
-LEFT_UP = MOUSE_INPUTS['left_up']
+LEFT_DOWN = Input(0, MouseInput(0, 0, 0, 0x0002, 0, None))
+LEFT_UP   = Input(0, MouseInput(0, 0, 0, 0x0004, 0, None))
 
 SendInput = ctypes.windll.user32.SendInput
 SendInput.argtypes = [ctypes.c_uint, ctypes.POINTER(Input), ctypes.c_int]
-SendInput.restype = ctypes.c_uint
 
-def send_click_fast():
-    """Ultra-fast click function using pre-created inputs"""
-    SendInput(1, ctypes.byref(MOUSE_INPUTS['left_down']), ctypes.sizeof(Input))
-    SendInput(1, ctypes.byref(MOUSE_INPUTS['left_up']), ctypes.sizeof(Input))
+def send_click():
+    SendInput(1, ctypes.byref(LEFT_DOWN), ctypes.sizeof(Input))
+    SendInput(1, ctypes.byref(LEFT_UP), ctypes.sizeof(Input))
 
 class AutoClickerGUI:
     def __init__(self, root):
@@ -299,36 +277,14 @@ class AutoClickerGUI:
             self.running = False
             self.status_label.config(text="Status: Disabled", fg="white")
 
-    def click_loop_nanosecond(self):
-        """Optimized click loop with nanosecond timing"""
-        try:
-            cps = self.current_cps
-            if cps <= 0:
-                return
-            
-            target_interval_ns = int(1_000_000_000 / cps)
-            next_click_time_ns = time_ns()
-            
-            while not self.stop_clicking.is_set():
-                current_time_ns = time_ns()
-                
-                if current_time_ns >= next_click_time_ns:
-                    send_click_fast()
-                    
-                    next_click_time_ns += target_interval_ns
-                    
-                    if current_time_ns - next_click_time_ns > target_interval_ns:
-                        next_click_time_ns = current_time_ns + target_interval_ns
-                
-                sleep_time_ns = next_click_time_ns - time_ns()
-                
-                if sleep_time_ns > 1_000_000:
-                    time.sleep(sleep_time_ns / 1_000_000_000)
-                elif sleep_time_ns > 10_000:
-                    pass
-                    
-        except Exception as e:
-            print(f"Error in click loop: {e}")
+    def click_loop(self):
+        interval = int(1_000_000_000 / self.current_cps)
+        next_time = time_ns()
+
+        while not self.stop_clicking.is_set():
+            if time_ns() >= next_time:
+                send_click()
+                next_time += interval
 
     def update_loop(self):
         if self.macro_enabled and self.trigger_key and self.should_click():
@@ -336,7 +292,7 @@ class AutoClickerGUI:
                 self.running = True
                 self.stop_clicking.clear()
                 threading.Thread(
-                    target=self.click_loop_nanosecond,
+                    target=self.click_loop,
                     daemon=True
                 ).start()
                 self.status_label.config(
@@ -352,7 +308,7 @@ class AutoClickerGUI:
                     fg="white"
                 )
 
-        self.root.after(1, self.update_loop)
+        self.root.after(5, self.update_loop)
 
 if __name__ == "__main__":
     root = tk.Tk()
